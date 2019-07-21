@@ -1,0 +1,82 @@
+<mat-toolbar color="primary" class="signOutStyle">
+    <mat-form-field *ngIf="authData && authData.is_admin">
+        <mat-select (selectionChange)="refreshData()" [(value)]="selectedRegion" placeholder="Select Region">
+            <mat-option *ngFor="let region of regions" [value]="region">
+                {{region}}
+            </mat-option>
+        </mat-select>
+    </mat-form-field>
+    <div>
+        <span>Reload data:</span>
+        <button mat-icon-button (click)="refreshData()">
+            <mat-icon>refresh</mat-icon>
+        </button>
+        <button mat-stroked-button (click)="logout()">Logout</button>
+    </div>
+
+</mat-toolbar>
+<span *ngIf="authData.is_admin === false">
+
+    <div class="Row">
+        <div class="Column">
+            <mat-card *ngIf="candidate">Name: {{candidate.name}}</mat-card>
+        </div>
+        <div class="Column">
+            <mat-card *ngIf="candidate">Region: {{selectedRegion}}</mat-card>
+        </div>
+        <div class="Column">
+            <mat-card *ngIf="candidate">Symbol: {{candidate.symbol}}</mat-card>
+        </div>
+        <div class="Column">
+            <mat-card *ngIf="candidate">Votes: {{candidate.votes}}</mat-card>
+        </div>
+    </div>
+</span>
+<div *ngIf="authData.is_admin === true">
+    <mat-card class="card-result" *ngFor="let candidate of candidates | orderBy: ['-votes']">{{candidate.name}}
+        <br />{{candidate.votes}}</mat-card>
+</div>
+<div *ngIf="selectedRegion && authData && authData.is_admin" style="clear:both" class="container mat-elevation-z8">
+
+    <mat-table #table [dataSource]="dataSource" matSort class="mat-cell">
+
+        <ng-container matColumnDef="candidateId" *ngIf="authData.is_admin === true">
+            <mat-header-cell *matHeaderCellDef>ID</mat-header-cell>
+            <mat-cell *matCellDef="let row">{{row.candidateId}}</mat-cell>
+        </ng-container>
+
+        <ng-container matColumnDef="name" *ngIf="authData.is_admin === true">
+            <mat-header-cell *matHeaderCellDef>Name</mat-header-cell>
+            <mat-cell *matCellDef="let row">{{row.name}}</mat-cell>
+        </ng-container>
+
+        <ng-container matColumnDef="symbol" *ngIf="authData.is_admin === true">
+            <mat-header-cell *matHeaderCellDef>Symbol</mat-header-cell>
+            <mat-cell *matCellDef="let row"> {{row.symbol}}</mat-cell>
+        </ng-container>
+
+        <ng-container matColumnDef="actions" *ngIf="authData.is_admin === true">
+            <mat-header-cell *matHeaderCellDef>
+                <!-- <button mat-raised-button color="primary" (click)="addNew()">Add</button> -->
+            </mat-header-cell>
+
+            <mat-cell *matCellDef="let row; let i=index;">
+                <button mat-icon-button color="accent" (click)="delete(row.candidateId, row.name)">
+                    <mat-icon aria-label="Delete">delete</mat-icon>
+                </button>
+            </mat-cell>
+        </ng-container>
+
+        <mat-header-row *matHeaderRowDef="['candidateId', 'name', 'symbol', 'actions']"></mat-header-row>
+        <mat-row *matRowDef="let row; columns: ['candidateId', 'name', 'symbol', 'actions'];"></mat-row>
+    </mat-table>
+
+
+    <div class="no-results" [style.display]="candidates.length == 0 ? '' : 'none'">
+        No results
+    </div>
+</div>
+
+<mat-card *ngIf="authData.is_admin === true">
+    <button mat-raised-button color="primary" (click)="addNew()">Add</button>
+</mat-card>
